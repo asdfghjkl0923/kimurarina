@@ -10,19 +10,10 @@ body {
     margin: 0;
     font-family: sans-serif;
     text-align: center;
-
-    /* 🌱 全面畑（土） */
     background: #8B5A2B;
 }
 
-h1 {
-    margin: 10px;
-    color: white;
-}
-
-#info {
-    margin: 10px;
-    font-size: 18px;
+h1, #info {
     color: white;
 }
 
@@ -41,10 +32,8 @@ h1 {
     height: 100px;
     position: relative;
     overflow: hidden;
-    box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
 }
 
-/* モグラ */
 .mole {
     width: 70px;
     height: 70px;
@@ -66,7 +55,6 @@ h1 {
     position: absolute;
     top: 20px;
 }
-
 .eye.left { left: 18px; }
 .eye.right { right: 18px; }
 
@@ -84,6 +72,40 @@ h1 {
 /* 出現 */
 .mole.show {
     bottom: 10px;
+}
+
+/* 潰れ演出 */
+.mole.hit {
+    transform: translateX(-50%) scale(0.8);
+}
+
+/* Hitエフェクト */
+.effect {
+    position: absolute;
+    color: yellow;
+    font-weight: bold;
+    font-size: 20px;
+    animation: Hit 0.5s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes Hit {
+    0% { transform: scale(0.5); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* +1表示 */
+.scoreEffect {
+    position: absolute;
+    color: white;
+    font-size: 16px;
+    animation: floatUp 0.8s ease forwards;
+    pointer-events: none;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-30px); opacity: 0; }
 }
 
 button {
@@ -144,11 +166,34 @@ for (let i = 0; i < 9; i++) {
     mole.appendChild(eyeR);
     mole.appendChild(nose);
 
+    // タップ
     mole.addEventListener("click", () => {
         if (mole.classList.contains("show") && !isPaused) {
             score++;
             scoreEl.textContent = score;
-            mole.classList.remove("show");
+
+            // 潰れ
+            mole.classList.add("hit");
+
+            // POP文字
+            const effect = document.createElement("div");
+            effect.classList.add("effect");
+            effect.textContent = "POP!";
+            mole.appendChild(effect);
+
+            // +1表示
+            const scoreEffect = document.createElement("div");
+            scoreEffect.classList.add("scoreEffect");
+            scoreEffect.textContent = "+1";
+            mole.appendChild(scoreEffect);
+
+            // 元に戻す
+            setTimeout(() => {
+                mole.classList.remove("show");
+                mole.classList.remove("hit");
+                effect.remove();
+                scoreEffect.remove();
+            }, 300);
         }
     });
 
@@ -199,12 +244,7 @@ function startGame() {
 // 一時停止
 function togglePause() {
     isPaused = !isPaused;
-
-    if (isPaused) {
-        pauseBtn.textContent = "再開";
-    } else {
-        pauseBtn.textContent = "一時停止";
-    }
+    pauseBtn.textContent = isPaused ? "再開" : "一時停止";
 }
 </script>
 
