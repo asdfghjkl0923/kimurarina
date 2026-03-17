@@ -10,7 +10,31 @@ body {
     margin: 0;
     font-family: sans-serif;
     text-align: center;
-    background: #87CEEB;
+
+    /* 🌱 畑っぽい背景 */
+    background: linear-gradient(
+        to bottom,
+        #87CEEB 0%,
+        #87CEEB 50%,
+        #8B5A2B 50%,
+        #8B5A2B 100%
+    );
+}
+
+/* 草の模様 */
+body::after {
+    content: "";
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    height: 80px;
+    background: repeating-linear-gradient(
+        45deg,
+        #3cb371,
+        #3cb371 10px,
+        #2e8b57 10px,
+        #2e8b57 20px
+    );
 }
 
 h1 {
@@ -37,6 +61,7 @@ h1 {
     height: 100px;
     position: relative;
     overflow: hidden;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,0.3);
 }
 
 /* モグラ */
@@ -52,7 +77,7 @@ h1 {
     transition: 0.2s;
 }
 
-/* 顔パーツ */
+/* 顔 */
 .eye {
     width: 8px;
     height: 8px;
@@ -85,6 +110,9 @@ button {
     margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
+    border-radius: 10px;
+    border: none;
+    background: #ffcc66;
 }
 </style>
 </head>
@@ -121,7 +149,6 @@ for (let i = 0; i < 9; i++) {
     const mole = document.createElement("div");
     mole.classList.add("mole");
 
-    // 顔作成
     const eyeL = document.createElement("div");
     eyeL.classList.add("eye", "left");
 
@@ -135,7 +162,6 @@ for (let i = 0; i < 9; i++) {
     mole.appendChild(eyeR);
     mole.appendChild(nose);
 
-    // タップ
     mole.addEventListener("click", () => {
         if (mole.classList.contains("show")) {
             score++;
@@ -157,7 +183,7 @@ function showMole() {
     moles[index].classList.add("show");
 }
 
-// ゲーム開始（リトライ兼用）
+// ゲーム開始
 function startGame() {
     score = 0;
     time = 20;
