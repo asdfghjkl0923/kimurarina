@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>モグラたたきゲーム</title>
+<style>
+body {
+    margin: 0;
+    font-family: sans-serif;
+    text-align: center;
+    background: #87CEEB;
+}
+
+h1 {
+    margin: 10px;
+}
+
+#info {
+    margin: 10px;
+    font-size: 18px;
+}
+
+#game {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    width: 90vw;
+    max-width: 400px;
+    margin: auto;
+}
+
+.hole {
+    background: #654321;
+    border-radius: 50%;
+    height: 100px;
+    position: relative;
+    overflow: hidden;
+}
+
+.mole {
+    width: 60px;
+    height: 60px;
+    background: brown;
+    border-radius: 50%;
+    position: absolute;
+    bottom: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    transition: 0.2s;
+}
+
+.mole.show {
+    bottom: 10px;
+}
+
+button {
+    margin: 15px;
+    padding: 10px 20px;
+    font-size: 16px;
+}
+</style>
+</head>
+<body>
+
+<h1>モグラたたき🐹</h1>
+<div id="info">
+    スコア: <span id="score">0</span> |
+    残り時間: <span id="time">20</span>
+</div>
+
+<div id="game"></div>
+
+<button onclick="startGame()">スタート</button>
+
+<script>
+const game = document.getElementById("game");
+const scoreEl = document.getElementById("score");
+const timeEl = document.getElementById("time");
+
+let score = 0;
+let time = 20;
+let timer;
+let moleTimer;
+
+// 穴を作る
+for (let i = 0; i < 9; i++) {
+    const hole = document.createElement("div");
+    hole.classList.add("hole");
+
+    const mole = document.createElement("div");
+    mole.classList.add("mole");
+
+    // タップイベント
+    mole.addEventListener("click", () => {
+        if (mole.classList.contains("show")) {
+            score++;
+            scoreEl.textContent = score;
+            mole.classList.remove("show");
+        }
+    });
+
+    hole.appendChild(mole);
+    game.appendChild(hole);
+}
+
+// モグラ出現
+function showMole() {
+    const moles = document.querySelectorAll(".mole");
+    moles.forEach(m => m.classList.remove("show"));
+
+    const index = Math.floor(Math.random() * moles.length);
+    moles[index].classList.add("show");
+}
+
+// ゲーム開始
+function startGame() {
+    score = 0;
+    time = 20;
+    scoreEl.textContent = score;
+    timeEl.textContent = time;
+
+    clearInterval(timer);
+    clearInterval(moleTimer);
+
+    moleTimer = setInterval(showMole, 800);
+
+    timer = setInterval(() => {
+        time--;
+        timeEl.textContent = time;
+
+        if (time <= 0) {
+            clearInterval(timer);
+            clearInterval(moleTimer);
+            alert("終了！スコア: " + score);
+        }
+    }, 1000);
+}
+</script>
+
+</body>
+</html>
