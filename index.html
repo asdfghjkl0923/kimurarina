@@ -11,39 +11,19 @@ body {
     font-family: sans-serif;
     text-align: center;
 
-    /* 🌱 畑っぽい背景 */
-    background: linear-gradient(
-        to bottom,
-        #87CEEB 0%,
-        #87CEEB 50%,
-        #8B5A2B 50%,
-        #8B5A2B 100%
-    );
-}
-
-/* 草の模様 */
-body::after {
-    content: "";
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 80px;
-    background: repeating-linear-gradient(
-        45deg,
-        #3cb371,
-        #3cb371 10px,
-        #2e8b57 10px,
-        #2e8b57 20px
-    );
+    /* 🌱 全面畑（土） */
+    background: #8B5A2B;
 }
 
 h1 {
     margin: 10px;
+    color: white;
 }
 
 #info {
     margin: 10px;
     font-size: 18px;
+    color: white;
 }
 
 #game {
@@ -68,7 +48,7 @@ h1 {
 .mole {
     width: 70px;
     height: 70px;
-    background: #8b5a2b;
+    background: #a0522d;
     border-radius: 50%;
     position: absolute;
     bottom: -70px;
@@ -129,17 +109,19 @@ button {
 <div id="game"></div>
 
 <button onclick="startGame()">スタート</button>
-<button onclick="startGame()">リトライ</button>
+<button onclick="togglePause()" id="pauseBtn">一時停止</button>
 
 <script>
 const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
+const pauseBtn = document.getElementById("pauseBtn");
 
 let score = 0;
 let time = 20;
 let timer;
 let moleTimer;
+let isPaused = false;
 
 // 穴生成
 for (let i = 0; i < 9; i++) {
@@ -163,7 +145,7 @@ for (let i = 0; i < 9; i++) {
     mole.appendChild(nose);
 
     mole.addEventListener("click", () => {
-        if (mole.classList.contains("show")) {
+        if (mole.classList.contains("show") && !isPaused) {
             score++;
             scoreEl.textContent = score;
             mole.classList.remove("show");
@@ -187,24 +169,42 @@ function showMole() {
 function startGame() {
     score = 0;
     time = 20;
+    isPaused = false;
+    pauseBtn.textContent = "一時停止";
+
     scoreEl.textContent = score;
     timeEl.textContent = time;
 
     clearInterval(timer);
     clearInterval(moleTimer);
 
-    moleTimer = setInterval(showMole, 800);
+    moleTimer = setInterval(() => {
+        if (!isPaused) showMole();
+    }, 800);
 
     timer = setInterval(() => {
-        time--;
-        timeEl.textContent = time;
+        if (!isPaused) {
+            time--;
+            timeEl.textContent = time;
 
-        if (time <= 0) {
-            clearInterval(timer);
-            clearInterval(moleTimer);
-            alert("終了！スコア: " + score);
+            if (time <= 0) {
+                clearInterval(timer);
+                clearInterval(moleTimer);
+                alert("終了！スコア: " + score);
+            }
         }
     }, 1000);
+}
+
+// 一時停止
+function togglePause() {
+    isPaused = !isPaused;
+
+    if (isPaused) {
+        pauseBtn.textContent = "再開";
+    } else {
+        pauseBtn.textContent = "一時停止";
+    }
 }
 </script>
 
