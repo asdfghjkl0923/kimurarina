@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>モグラたたきゲーム</title>
+
 <style>
 body {
     margin: 0;
@@ -31,39 +32,67 @@ h1 {
 }
 
 .hole {
-    background: #654321;
+    background: #5a3d1e;
     border-radius: 50%;
     height: 100px;
     position: relative;
     overflow: hidden;
 }
 
+/* モグラ */
 .mole {
-    width: 60px;
-    height: 60px;
-    background: brown;
+    width: 70px;
+    height: 70px;
+    background: #8b5a2b;
     border-radius: 50%;
     position: absolute;
-    bottom: -60px;
+    bottom: -70px;
     left: 50%;
     transform: translateX(-50%);
     transition: 0.2s;
 }
 
+/* 顔パーツ */
+.eye {
+    width: 8px;
+    height: 8px;
+    background: black;
+    border-radius: 50%;
+    position: absolute;
+    top: 20px;
+}
+
+.eye.left { left: 18px; }
+.eye.right { right: 18px; }
+
+.nose {
+    width: 10px;
+    height: 10px;
+    background: pink;
+    border-radius: 50%;
+    position: absolute;
+    top: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* 出現 */
 .mole.show {
     bottom: 10px;
 }
 
 button {
-    margin: 15px;
+    margin: 10px;
     padding: 10px 20px;
     font-size: 16px;
 }
 </style>
 </head>
+
 <body>
 
 <h1>モグラたたき🐹</h1>
+
 <div id="info">
     スコア: <span id="score">0</span> |
     残り時間: <span id="time">20</span>
@@ -72,6 +101,7 @@ button {
 <div id="game"></div>
 
 <button onclick="startGame()">スタート</button>
+<button onclick="startGame()">リトライ</button>
 
 <script>
 const game = document.getElementById("game");
@@ -83,7 +113,7 @@ let time = 20;
 let timer;
 let moleTimer;
 
-// 穴を作る
+// 穴生成
 for (let i = 0; i < 9; i++) {
     const hole = document.createElement("div");
     hole.classList.add("hole");
@@ -91,7 +121,21 @@ for (let i = 0; i < 9; i++) {
     const mole = document.createElement("div");
     mole.classList.add("mole");
 
-    // タップイベント
+    // 顔作成
+    const eyeL = document.createElement("div");
+    eyeL.classList.add("eye", "left");
+
+    const eyeR = document.createElement("div");
+    eyeR.classList.add("eye", "right");
+
+    const nose = document.createElement("div");
+    nose.classList.add("nose");
+
+    mole.appendChild(eyeL);
+    mole.appendChild(eyeR);
+    mole.appendChild(nose);
+
+    // タップ
     mole.addEventListener("click", () => {
         if (mole.classList.contains("show")) {
             score++;
@@ -113,7 +157,7 @@ function showMole() {
     moles[index].classList.add("show");
 }
 
-// ゲーム開始
+// ゲーム開始（リトライ兼用）
 function startGame() {
     score = 0;
     time = 20;
