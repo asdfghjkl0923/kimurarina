@@ -46,6 +46,11 @@ h1, #info {
     transition: 0.2s;
 }
 
+/* フェイクモグラ */
+.mole.fake {
+    background: red;
+}
+
 /* 顔 */
 .eye {
     width: 8px;
@@ -69,43 +74,33 @@ h1, #info {
     transform: translateX(-50%);
 }
 
-/* 出現 */
 .mole.show {
     bottom: 10px;
 }
 
-/* 潰れ演出 */
 .mole.hit {
     transform: translateX(-50%) scale(0.8);
 }
 
-/* Hitエフェクト */
+/* エフェクト */
 .effect {
     position: absolute;
-    color: yellow;
     font-weight: bold;
-    font-size: 20px;
-    animation: Hit 0.5s ease forwards;
-    pointer-events: none;
+    font-size: 18px;
+    animation: pop 0.5s forwards;
 }
 
-@keyframes Hit {
+@keyframes pop {
     0% { transform: scale(0.5); opacity: 1; }
     100% { transform: scale(1.5); opacity: 0; }
 }
 
-/* +1表示 */
-.scoreEffect {
-    position: absolute;
+.scorePlus {
     color: white;
-    font-size: 16px;
-    animation: floatUp 0.8s ease forwards;
-    pointer-events: none;
 }
 
-@keyframes floatUp {
-    0% { transform: translateY(0); opacity: 1; }
-    100% { transform: translateY(-30px); opacity: 0; }
+.scoreMinus {
+    color: cyan;
 }
 
 button {
@@ -166,35 +161,33 @@ for (let i = 0; i < 9; i++) {
     mole.appendChild(eyeR);
     mole.appendChild(nose);
 
-    // タップ
     mole.addEventListener("click", () => {
-        if (mole.classList.contains("show") && !isPaused) {
+        if (!mole.classList.contains("show") || isPaused) return;
+
+        mole.classList.add("hit");
+
+        const effect = document.createElement("div");
+        effect.classList.add("effect");
+
+        if (mole.classList.contains("fake")) {
+            // ❌ フェイク
+            score--;
+            effect.textContent = "MISS!";
+            effect.classList.add("scoreMinus");
+        } else {
+            // ⭕ 正解
             score++;
-            scoreEl.textContent = score;
-
-            // 潰れ
-            mole.classList.add("hit");
-
-            // POP文字
-            const effect = document.createElement("div");
-            effect.classList.add("effect");
-            effect.textContent = "POP!";
-            mole.appendChild(effect);
-
-            // +1表示
-            const scoreEffect = document.createElement("div");
-            scoreEffect.classList.add("scoreEffect");
-            scoreEffect.textContent = "+1";
-            mole.appendChild(scoreEffect);
-
-            // 元に戻す
-            setTimeout(() => {
-                mole.classList.remove("show");
-                mole.classList.remove("hit");
-                effect.remove();
-                scoreEffect.remove();
-            }, 300);
+            effect.textContent = "+1";
+            effect.classList.add("scorePlus");
         }
+
+        scoreEl.textContent = score;
+        mole.appendChild(effect);
+
+        setTimeout(() => {
+            mole.classList.remove("show", "hit", "fake");
+            effect.remove();
+        }, 300);
     });
 
     hole.appendChild(mole);
@@ -204,10 +197,19 @@ for (let i = 0; i < 9; i++) {
 // モグラ出現
 function showMole() {
     const moles = document.querySelectorAll(".mole");
-    moles.forEach(m => m.classList.remove("show"));
+    moles.forEach(m => {
+        m.classList.remove("show", "fake");
+    });
 
     const index = Math.floor(Math.random() * moles.length);
-    moles[index].classList.add("show");
+    const mole = moles[index];
+
+    // 20%でフェイク
+    if (Math.random() < 0.2) {
+        mole.classList.add("fake");
+    }
+
+    mole.classList.add("show");
 }
 
 // ゲーム開始
