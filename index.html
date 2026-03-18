@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>モグラたたきゲーム</title>
+<title>ディグダたたきゲーム</title>
 
 <style>
 body {
@@ -13,8 +13,13 @@ body {
     background: #8B5A2B;
 }
 
-h1, #info {
+h1, #info, #combo {
     color: white;
+}
+
+#combo {
+    font-size: 20px;
+    margin-bottom: 5px;
 }
 
 #game {
@@ -104,7 +109,6 @@ button {
     background: #ffcc66;
 }
 
-/* ルール画面 */
 #ruleScreen {
     position: fixed;
     top: 0;
@@ -117,7 +121,6 @@ button {
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    z-index: 1000;
 }
 </style>
 </head>
@@ -127,16 +130,17 @@ button {
 <div id="ruleScreen">
     <h2>ルール説明</h2>
     <p>
-        😀 出てきたモグラをタップ！<br>
-        😈 赤いモグラはフェイク（押すと減点）<br>
-        ⏱ 制限時間は20秒！<br><br>
-        がんばって高スコアを目指そう🔥
+        😀 ディグダをタップ！<br>
+        😈 赤はフェイク（減点）<br>
+        🔥 連続ヒットでコンボUP！<br>
     </p>
-    <button onclick="startFromRule()">ゲームスタート</button>
+    <button onclick="startFromRule()">スタート</button>
 </div>
 
-<h1>モグラたたき🌱</h1>
-    
+<h1>ディグダたたき🌱</h1>
+
+<div id="combo">コンボ: 0</div>
+
 <div id="info">
     スコア: <span id="score">0</span> |
     残り時間: <span id="time">20</span>
@@ -150,22 +154,22 @@ button {
 const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
+const comboEl = document.getElementById("combo");
 const pauseBtn = document.getElementById("pauseBtn");
 const ruleScreen = document.getElementById("ruleScreen");
 
 let score = 0;
 let time = 20;
+let combo = 0;
 let timer;
 let moleTimer;
 let isPaused = false;
 
-// ルールから開始
 function startFromRule() {
     ruleScreen.style.display = "none";
     startGame();
 }
 
-// 穴生成
 for (let i = 0; i < 9; i++) {
     const hole = document.createElement("div");
     hole.classList.add("hole");
@@ -196,15 +200,24 @@ for (let i = 0; i < 9; i++) {
 
         if (mole.dataset.fake === "true") {
             score--;
+            combo = 0;
             effect.textContent = "MISS!";
             effect.classList.add("scoreMinus");
         } else {
-            score++;
-            effect.textContent = "+1";
+            combo++;
+
+            let add = 1;
+            if (combo >= 10) add = 3;
+            else if (combo >= 5) add = 2;
+
+            score += add;
+            effect.textContent = "+" + add;
             effect.classList.add("scorePlus");
         }
 
         scoreEl.textContent = score;
+        comboEl.textContent = "コンボ: " + combo;
+
         mole.appendChild(effect);
 
         setTimeout(() => {
@@ -217,7 +230,6 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
-// モグラ出現
 function showMole() {
     const moles = document.querySelectorAll(".mole");
 
@@ -237,15 +249,16 @@ function showMole() {
     mole.classList.add("show");
 }
 
-// ゲーム開始
 function startGame() {
     score = 0;
     time = 20;
+    combo = 0;
     isPaused = false;
     pauseBtn.textContent = "一時停止";
 
     scoreEl.textContent = score;
     timeEl.textContent = time;
+    comboEl.textContent = "コンボ: 0";
 
     clearInterval(timer);
     clearInterval(moleTimer);
@@ -263,13 +276,12 @@ function startGame() {
                 clearInterval(timer);
                 clearInterval(moleTimer);
                 alert("終了！スコア: " + score);
-                ruleScreen.style.display = "flex"; // もう一回遊べる
+                ruleScreen.style.display = "flex";
             }
         }
     }, 1000);
 }
 
-// 一時停止
 function togglePause() {
     isPaused = !isPaused;
     pauseBtn.textContent = isPaused ? "再開" : "一時停止";
