@@ -46,12 +46,10 @@ h1, #info {
     transition: 0.2s;
 }
 
-/* フェイクモグラ */
 .mole.fake {
     background: red;
 }
 
-/* 顔 */
 .eye {
     width: 8px;
     height: 8px;
@@ -82,7 +80,6 @@ h1, #info {
     transform: translateX(-50%) scale(0.8);
 }
 
-/* エフェクト */
 .effect {
     position: absolute;
     font-weight: bold;
@@ -95,13 +92,8 @@ h1, #info {
     100% { transform: scale(1.5); opacity: 0; }
 }
 
-.scorePlus {
-    color: white;
-}
-
-.scoreMinus {
-    color: cyan;
-}
+.scorePlus { color: white; }
+.scoreMinus { color: cyan; }
 
 button {
     margin: 10px;
@@ -116,7 +108,7 @@ button {
 
 <body>
 
-<h1>モグラたたき🐹</h1>
+<h1>モグラたたき🌱</h1>
 
 <div id="info">
     スコア: <span id="score">0</span> |
@@ -169,13 +161,11 @@ for (let i = 0; i < 9; i++) {
         const effect = document.createElement("div");
         effect.classList.add("effect");
 
-        if (mole.classList.contains("fake")) {
-            // ❌ フェイク
+        if (mole.dataset.fake === "true") {
             score--;
             effect.textContent = "MISS!";
             effect.classList.add("scoreMinus");
         } else {
-            // ⭕ 正解
             score++;
             effect.textContent = "+1";
             effect.classList.add("scorePlus");
@@ -185,7 +175,7 @@ for (let i = 0; i < 9; i++) {
         mole.appendChild(effect);
 
         setTimeout(() => {
-            mole.classList.remove("show", "hit", "fake");
+            mole.classList.remove("show", "hit");
             effect.remove();
         }, 300);
     });
@@ -194,19 +184,23 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
-// モグラ出現
+// モグラ出現（修正済み）
 function showMole() {
     const moles = document.querySelectorAll(".mole");
+
     moles.forEach(m => {
-        m.classList.remove("show", "fake");
+        m.classList.remove("show");
     });
 
     const index = Math.floor(Math.random() * moles.length);
     const mole = moles[index];
 
-    // 20%でフェイク
     if (Math.random() < 0.2) {
+        mole.dataset.fake = "true";
         mole.classList.add("fake");
+    } else {
+        mole.dataset.fake = "false";
+        mole.classList.remove("fake");
     }
 
     mole.classList.add("show");
