@@ -3,14 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ディグダたたきゲーム</title>
+<title>モグラたたき🌱</title>
 
 <style>
-#ruleScreen {
-    position: fixed;
-    z-index: 9999;
-}
-</style>
 body {
     margin: 0;
     font-family: sans-serif;
@@ -24,7 +19,6 @@ h1, #info, #combo {
 
 #combo {
     font-size: 20px;
-    margin-bottom: 5px;
 }
 
 #game {
@@ -34,6 +28,8 @@ h1, #info, #combo {
     width: 90vw;
     max-width: 400px;
     margin: auto;
+    position: relative;
+    z-index: 1;
 }
 
 .hole {
@@ -114,8 +110,10 @@ button {
     background: #ffcc66;
 }
 
+/* ルール画面 */
 #ruleScreen {
     position: fixed;
+    z-index: 9999;
     top: 0;
     left: 0;
     width: 100%;
@@ -132,17 +130,18 @@ button {
 
 <body>
 
+<!-- ルール画面 -->
 <div id="ruleScreen">
     <h2>ルール説明</h2>
     <p>
-        😀 ディグダをタップ！<br>
+        😀 モグラをタップ！<br>
         😈 赤はフェイク（減点）<br>
-        🔥 連続ヒットでコンボUP！<br>
+        🔥 コンボで高得点！
     </p>
     <button onclick="startFromRule()">スタート</button>
 </div>
 
-<h1>ディグダたたき🌱</h1>
+<h1>モグラたたき🌱</h1>
 
 <div id="combo">コンボ: 0</div>
 
@@ -175,6 +174,7 @@ function startFromRule() {
     startGame();
 }
 
+// モグラ生成
 for (let i = 0; i < 9; i++) {
     const hole = document.createElement("div");
     hole.classList.add("hole");
@@ -235,6 +235,7 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
+// モグラ出現
 function showMole() {
     const moles = document.querySelectorAll(".mole");
 
@@ -254,16 +255,17 @@ function showMole() {
     mole.classList.add("show");
 }
 
+// ゲーム開始
 function startGame() {
     score = 0;
     time = 20;
     combo = 0;
     isPaused = false;
-    pauseBtn.textContent = "一時停止";
 
     scoreEl.textContent = score;
     timeEl.textContent = time;
     comboEl.textContent = "コンボ: 0";
+    pauseBtn.textContent = "一時停止";
 
     clearInterval(timer);
     clearInterval(moleTimer);
@@ -287,6 +289,7 @@ function startGame() {
     }, 1000);
 }
 
+// 一時停止
 function togglePause() {
     isPaused = !isPaused;
     pauseBtn.textContent = isPaused ? "再開" : "一時停止";
