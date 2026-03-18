@@ -103,13 +103,40 @@ button {
     border: none;
     background: #ffcc66;
 }
+
+/* ルール画面 */
+#ruleScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.8);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    z-index: 1000;
+}
 </style>
 </head>
 
 <body>
 
-<h1>モグラたたき🌱</h1>
+<div id="ruleScreen">
+    <h2>ルール説明</h2>
+    <p>
+        😀 出てきたモグラをタップ！<br>
+        😈 赤いモグラはフェイク（押すと減点）<br>
+        ⏱ 制限時間は20秒！<br><br>
+        がんばって高スコアを目指そう🔥
+    </p>
+    <button onclick="startFromRule()">ゲームスタート</button>
+</div>
 
+<h1>モグラたたき🌱</h1>
+    
 <div id="info">
     スコア: <span id="score">0</span> |
     残り時間: <span id="time">20</span>
@@ -117,7 +144,6 @@ button {
 
 <div id="game"></div>
 
-<button onclick="startGame()">スタート</button>
 <button onclick="togglePause()" id="pauseBtn">一時停止</button>
 
 <script>
@@ -125,12 +151,19 @@ const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 const pauseBtn = document.getElementById("pauseBtn");
+const ruleScreen = document.getElementById("ruleScreen");
 
 let score = 0;
 let time = 20;
 let timer;
 let moleTimer;
 let isPaused = false;
+
+// ルールから開始
+function startFromRule() {
+    ruleScreen.style.display = "none";
+    startGame();
+}
 
 // 穴生成
 for (let i = 0; i < 9; i++) {
@@ -184,13 +217,11 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
-// モグラ出現（修正済み）
+// モグラ出現
 function showMole() {
     const moles = document.querySelectorAll(".mole");
 
-    moles.forEach(m => {
-        m.classList.remove("show");
-    });
+    moles.forEach(m => m.classList.remove("show"));
 
     const index = Math.floor(Math.random() * moles.length);
     const mole = moles[index];
@@ -232,6 +263,7 @@ function startGame() {
                 clearInterval(timer);
                 clearInterval(moleTimer);
                 alert("終了！スコア: " + score);
+                ruleScreen.style.display = "flex"; // もう一回遊べる
             }
         }
     }, 1000);
