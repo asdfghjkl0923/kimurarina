@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>モグラたたき🌱</title>
+<title>モグラたたきゲーム🌱</title>
 
 <style>
 body {
@@ -52,9 +53,7 @@ h1, #info, #combo {
     transition: 0.2s;
 }
 
-.mole.fake {
-    background: red;
-}
+.mole.fake { background: red; }
 
 .eye {
     width: 8px;
@@ -78,13 +77,8 @@ h1, #info, #combo {
     transform: translateX(-50%);
 }
 
-.mole.show {
-    bottom: 10px;
-}
-
-.mole.hit {
-    transform: translateX(-50%) scale(0.8);
-}
+.mole.show { bottom: 10px; }
+.mole.hit { transform: translateX(-50%) scale(0.8); }
 
 .effect {
     position: absolute;
@@ -110,20 +104,23 @@ button {
     background: #ffcc66;
 }
 
-/* ルール画面 */
-#ruleScreen {
+/* 画面共通 */
+.overlay {
     position: fixed;
     z-index: 9999;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
     color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
+}
+
+/* 非表示 */
+.hidden {
+    display: none;
 }
 </style>
 </head>
@@ -131,7 +128,7 @@ button {
 <body>
 
 <!-- ルール画面 -->
-<div id="ruleScreen">
+<div id="ruleScreen" class="overlay">
     <h2>ルール説明</h2>
     <p>
         😀 モグラをタップ！<br>
@@ -141,7 +138,16 @@ button {
     <button onclick="startFromRule()">スタート</button>
 </div>
 
-<h1>モグラたたき🌱</h1>
+<!-- リザルト画面 -->
+<div id="resultScreen" class="overlay hidden">
+    <h2>RESULT 🎊</h2>
+    <p id="finalScore"></p>
+    <p id="maxCombo"></p>
+    <button onclick="restartGame()">もう一回</button>
+    <button onclick="backToRule()">ルールへ</button>
+</div>
+
+<h1>モグラたたきゲーム🌱</h1>
 
 <div id="combo">コンボ: 0</div>
 
@@ -159,19 +165,36 @@ const game = document.getElementById("game");
 const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 const comboEl = document.getElementById("combo");
+
 const pauseBtn = document.getElementById("pauseBtn");
 const ruleScreen = document.getElementById("ruleScreen");
+const resultScreen = document.getElementById("resultScreen");
+
+const finalScore = document.getElementById("finalScore");
+const maxComboText = document.getElementById("maxCombo");
 
 let score = 0;
 let time = 20;
 let combo = 0;
+let maxCombo = 0;
 let timer;
 let moleTimer;
 let isPaused = false;
 
+// 画面操作
 function startFromRule() {
-    ruleScreen.style.display = "none";
+    ruleScreen.classList.add("hidden");
     startGame();
+}
+
+function restartGame() {
+    resultScreen.classList.add("hidden");
+    startGame();
+}
+
+function backToRule() {
+    resultScreen.classList.add("hidden");
+    ruleScreen.classList.remove("hidden");
 }
 
 // モグラ生成
@@ -210,6 +233,7 @@ for (let i = 0; i < 9; i++) {
             effect.classList.add("scoreMinus");
         } else {
             combo++;
+            if (combo > maxCombo) maxCombo = combo;
 
             let add = 1;
             if (combo >= 10) add = 3;
@@ -235,14 +259,11 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
-// モグラ出現
 function showMole() {
     const moles = document.querySelectorAll(".mole");
-
     moles.forEach(m => m.classList.remove("show"));
 
-    const index = Math.floor(Math.random() * moles.length);
-    const mole = moles[index];
+    const mole = moles[Math.floor(Math.random() * moles.length)];
 
     if (Math.random() < 0.2) {
         mole.dataset.fake = "true";
@@ -255,11 +276,11 @@ function showMole() {
     mole.classList.add("show");
 }
 
-// ゲーム開始
 function startGame() {
     score = 0;
     time = 20;
     combo = 0;
+    maxCombo = 0;
     isPaused = false;
 
     scoreEl.textContent = score;
@@ -282,14 +303,16 @@ function startGame() {
             if (time <= 0) {
                 clearInterval(timer);
                 clearInterval(moleTimer);
-                alert("終了！スコア: " + score);
-                ruleScreen.style.display = "flex";
+
+                finalScore.textContent = "スコア: " + score;
+                maxComboText.textContent = "最大コンボ: " + maxCombo;
+
+                resultScreen.classList.remove("hidden");
             }
         }
     }, 1000);
 }
 
-// 一時停止
 function togglePause() {
     isPaused = !isPaused;
     pauseBtn.textContent = isPaused ? "再開" : "一時停止";
