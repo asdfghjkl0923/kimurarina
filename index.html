@@ -2,357 +2,134 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>モグラたたきゲーム🌱</title>
-
+<title>ミニRPGバトル</title>
 <style>
 body {
-    margin: 0;
-    font-family: sans-serif;
-    text-align: center;
-    background: #8B5A2B;
+  font-family: sans-serif;
+  text-align: center;
+  background: #222;
+  color: white;
 }
 
-h1, #info, #combo {
-    color: white;
-}
-
-#combo {
-    font-size: 20px;
-}
-
-/* ゲーム */
 #game {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    width: 90vw;
-    max-width: 400px;
-    margin: auto;
-    position: relative;
-    z-index: 1;
+  margin-top: 30px;
 }
 
-.hole {
-    background: #5a3d1e;
-    border-radius: 50%;
-    height: 100px;
-    position: relative;
-    overflow: hidden;
+.bar {
+  width: 200px;
+  height: 20px;
+  background: #555;
+  margin: 10px auto;
+  border-radius: 10px;
 }
 
-.mole {
-    width: 70px;
-    height: 70px;
-    background: #a0522d;
-    border-radius: 50%;
-    position: absolute;
-    bottom: -70px;
-    left: 50%;
-    transform: translateX(-50%);
-    transition: 0.2s;
+.hp {
+  height: 100%;
+  background: lime;
+  border-radius: 10px;
 }
-
-.mole.fake { background: red; }
-
-.eye {
-    width: 8px;
-    height: 8px;
-    background: black;
-    border-radius: 50%;
-    position: absolute;
-    top: 20px;
-}
-.eye.left { left: 18px; }
-.eye.right { right: 18px; }
-
-.nose {
-    width: 10px;
-    height: 10px;
-    background: pink;
-    border-radius: 50%;
-    position: absolute;
-    top: 32px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.mole.show { bottom: 10px; }
-.mole.hit { transform: translateX(-50%) scale(0.8); }
-
-.effect {
-    position: absolute;
-    font-weight: bold;
-    font-size: 18px;
-    animation: pop 0.5s forwards;
-}
-
-@keyframes pop {
-    0% { transform: scale(0.5); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-}
-
-.scorePlus { color: white; }
-.scoreMinus { color: cyan; }
 
 button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 10px;
-    border: none;
-    background: #ffcc66;
+  margin: 5px;
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* 画面共通 */
-.overlay {
-    position: fixed;
-    z-index: 9999;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background: rgba(0,0,0,0.85);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-}
+.attack { background: red; color: white; }
+.heal { background: green; color: white; }
 
-.hidden {
-    display: none;
-}
-
-/* カウントダウン */
-#countText {
-    font-size: 80px;
+#log {
+  margin-top: 20px;
+  height: 100px;
 }
 </style>
 </head>
-
 <body>
 
-<!-- ルール -->
-<div id="ruleScreen" class="overlay">
-    <h2>ルール説明</h2>
-    <p>
-        😀 モグラをタップ！<br>
-        😈 赤はフェイク（減点）<br>
-        🔥 コンボで高得点！
-    </p>
-    <button onclick="startFromRule()">スタート</button>
+<h1>⚔️ ミニRPGバトル</h1>
+
+<div id="game">
+
+  <h2>プレイヤー</h2>
+  <div class="bar"><div id="playerHP" class="hp"></div></div>
+  <p id="playerText"></p>
+
+  <h2>モンスター</h2>
+  <div class="bar"><div id="enemyHP" class="hp"></div></div>
+  <p id="enemyText"></p>
+
+  <button class="attack" onclick="attack()">攻撃</button>
+  <button class="heal" onclick="heal()">回復</button>
+
+  <div id="log"></div>
+
 </div>
-
-<!-- カウントダウン -->
-<div id="countdown" class="overlay hidden">
-    <h1 id="countText">3</h1>
-</div>
-
-<!-- リザルト -->
-<div id="resultScreen" class="overlay hidden">
-    <h2>RESULT 🎊</h2>
-    <p id="finalScore"></p>
-    <p id="maxCombo"></p>
-    <button onclick="restartGame()">もう一回</button>
-    <button onclick="backToRule()">ルールへ</button>
-</div>
-
-<h1>モグラたたきゲーム🌱</h1>
-
-<div id="combo">コンボ: 0</div>
-
-<div id="info">
-    スコア: <span id="score">0</span> |
-    残り時間: <span id="time">20</span>
-</div>
-
-<div id="game"></div>
-
-<button onclick="togglePause()" id="pauseBtn">一時停止</button>
 
 <script>
-const game = document.getElementById("game");
-const scoreEl = document.getElementById("score");
-const timeEl = document.getElementById("time");
-const comboEl = document.getElementById("combo");
+let playerMax = 100;
+let playerHP = 100;
 
-const pauseBtn = document.getElementById("pauseBtn");
-const ruleScreen = document.getElementById("ruleScreen");
-const resultScreen = document.getElementById("resultScreen");
+let enemyMax = 100;
+let enemyHP = 100;
 
-const countdown = document.getElementById("countdown");
-const countText = document.getElementById("countText");
+function updateUI() {
+  document.getElementById("playerHP").style.width = (playerHP/playerMax*100) + "%";
+  document.getElementById("enemyHP").style.width = (enemyHP/enemyMax*100) + "%";
 
-const finalScore = document.getElementById("finalScore");
-const maxComboText = document.getElementById("maxCombo");
-
-let score = 0;
-let time = 20;
-let combo = 0;
-let maxCombo = 0;
-let timer;
-let moleTimer;
-let isPaused = false;
-
-/* ===== 画面操作 ===== */
-function startFromRule() {
-    ruleScreen.classList.add("hidden");
-    startCountdown();
+  document.getElementById("playerText").textContent = playerHP + " / " + playerMax;
+  document.getElementById("enemyText").textContent = enemyHP + " / " + enemyMax;
 }
 
-function restartGame() {
-    resultScreen.classList.add("hidden");
-    startCountdown();
+function log(text) {
+  document.getElementById("log").innerHTML = text;
 }
 
-function backToRule() {
-    resultScreen.classList.add("hidden");
-    ruleScreen.classList.remove("hidden");
+function attack() {
+  let damage = Math.floor(Math.random() * 20) + 5;
+  enemyHP -= damage;
+
+  log("💥 敵に " + damage + " ダメージ！");
+
+  if (enemyHP <= 0) {
+    enemyHP = 0;
+    updateUI();
+    log("🎉 勝利！！");
+    return;
+  }
+
+  enemyTurn();
+  updateUI();
 }
 
-/* ===== カウントダウン ===== */
-function startCountdown() {
-    let count = 3;
-    countdown.classList.remove("hidden");
-    countText.textContent = count;
+function heal() {
+  let heal = Math.floor(Math.random() * 15) + 10;
+  playerHP += heal;
+  if (playerHP > playerMax) playerHP = playerMax;
 
-    const interval = setInterval(() => {
-        count--;
+  log("💚 " + heal + " 回復した！");
 
-        if (count > 0) {
-            countText.textContent = count;
-        } else if (count === 0) {
-            countText.textContent = "GO!";
-        } else {
-            clearInterval(interval);
-            countdown.classList.add("hidden");
-            startGame();
-        }
-    }, 1000);
+  enemyTurn();
+  updateUI();
 }
 
-/* ===== モグラ生成 ===== */
-for (let i = 0; i < 9; i++) {
-    const hole = document.createElement("div");
-    hole.classList.add("hole");
+function enemyTurn() {
+  let damage = Math.floor(Math.random() * 15) + 5;
+  playerHP -= damage;
 
-    const mole = document.createElement("div");
-    mole.classList.add("mole");
+  if (playerHP <= 0) {
+    playerHP = 0;
+    updateUI();
+    log("💀 ゲームオーバー...");
+    return;
+  }
 
-    const eyeL = document.createElement("div");
-    eyeL.classList.add("eye", "left");
-
-    const eyeR = document.createElement("div");
-    eyeR.classList.add("eye", "right");
-
-    const nose = document.createElement("div");
-    nose.classList.add("nose");
-
-    mole.appendChild(eyeL);
-    mole.appendChild(eyeR);
-    mole.appendChild(nose);
-
-    mole.addEventListener("click", () => {
-        if (!mole.classList.contains("show") || isPaused) return;
-
-        mole.classList.add("hit");
-
-        const effect = document.createElement("div");
-        effect.classList.add("effect");
-
-        if (mole.dataset.fake === "true") {
-            score--;
-            combo = 0;
-            effect.textContent = "MISS!";
-            effect.classList.add("scoreMinus");
-        } else {
-            combo++;
-            if (combo > maxCombo) maxCombo = combo;
-
-            let add = 1;
-            if (combo >= 10) add = 3;
-            else if (combo >= 5) add = 2;
-
-            score += add;
-            effect.textContent = "+" + add;
-            effect.classList.add("scorePlus");
-        }
-
-        scoreEl.textContent = score;
-        comboEl.textContent = "コンボ: " + combo;
-
-        mole.appendChild(effect);
-
-        setTimeout(() => {
-            mole.classList.remove("show", "hit");
-            effect.remove();
-        }, 300);
-    });
-
-    hole.appendChild(mole);
-    game.appendChild(hole);
+  log(document.getElementById("log").innerHTML + "<br>👿 敵の攻撃！" + damage + "ダメージ");
 }
 
-/* ===== モグラ出現 ===== */
-function showMole() {
-    const moles = document.querySelectorAll(".mole");
-    moles.forEach(m => m.classList.remove("show"));
-
-    const mole = moles[Math.floor(Math.random() * moles.length)];
-
-    if (Math.random() < 0.2) {
-        mole.dataset.fake = "true";
-        mole.classList.add("fake");
-    } else {
-        mole.dataset.fake = "false";
-        mole.classList.remove("fake");
-    }
-
-    mole.classList.add("show");
-}
-
-/* ===== ゲーム開始 ===== */
-function startGame() {
-    score = 0;
-    time = 20;
-    combo = 0;
-    maxCombo = 0;
-    isPaused = false;
-
-    scoreEl.textContent = score;
-    timeEl.textContent = time;
-    comboEl.textContent = "コンボ: 0";
-    pauseBtn.textContent = "一時停止";
-
-    clearInterval(timer);
-    clearInterval(moleTimer);
-
-    moleTimer = setInterval(() => {
-        if (!isPaused) showMole();
-    }, 800);
-
-    timer = setInterval(() => {
-        if (!isPaused) {
-            time--;
-            timeEl.textContent = time;
-
-            if (time <= 0) {
-                clearInterval(timer);
-                clearInterval(moleTimer);
-
-                finalScore.textContent = "スコア: " + score;
-                maxComboText.textContent = "最大コンボ: " + maxCombo;
-
-                resultScreen.classList.remove("hidden");
-            }
-        }
-    }, 1000);
-}
-
-/* ===== 一時停止 ===== */
-function togglePause() {
-    isPaused = !isPaused;
-    pauseBtn.textContent = isPaused ? "再開" : "一時停止";
-}
+updateUI();
 </script>
 
 </body>
