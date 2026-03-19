@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>モグラたたきゲーム🌱</title>
+<title>モグラたたき🐹</title>
 
 <style>
 body {
@@ -12,9 +11,6 @@ body {
     font-family: sans-serif;
     text-align: center;
     background: #8B5A2B;
-    <div id="countdown" class="overlay hidden">
-    <h1 id="countText">3</h1>
-</div>
 }
 
 h1, #info, #combo {
@@ -25,6 +21,7 @@ h1, #info, #combo {
     font-size: 20px;
 }
 
+/* ゲーム */
 #game {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -121,27 +118,36 @@ button {
     flex-direction: column;
 }
 
-/* 非表示 */
 .hidden {
     display: none;
+}
+
+/* カウントダウン */
+#countText {
+    font-size: 80px;
 }
 </style>
 </head>
 
 <body>
 
-<!-- ルール画面 -->
+<!-- ルール -->
 <div id="ruleScreen" class="overlay">
     <h2>ルール説明</h2>
     <p>
-        😀 モグラをタップ！<br>
+        🐹 モグラをタップ！<br>
         😈 赤はフェイク（減点）<br>
         🔥 コンボで高得点！
     </p>
     <button onclick="startFromRule()">スタート</button>
 </div>
 
-<!-- リザルト画面 -->
+<!-- カウントダウン -->
+<div id="countdown" class="overlay hidden">
+    <h1 id="countText">3</h1>
+</div>
+
+<!-- リザルト -->
 <div id="resultScreen" class="overlay hidden">
     <h2>RESULT 🎊</h2>
     <p id="finalScore"></p>
@@ -150,7 +156,7 @@ button {
     <button onclick="backToRule()">ルールへ</button>
 </div>
 
-<h1>モグラたたきゲーム🌱</h1>
+<h1>モグラたたき🐹</h1>
 
 <div id="combo">コンボ: 0</div>
 
@@ -173,6 +179,9 @@ const pauseBtn = document.getElementById("pauseBtn");
 const ruleScreen = document.getElementById("ruleScreen");
 const resultScreen = document.getElementById("resultScreen");
 
+const countdown = document.getElementById("countdown");
+const countText = document.getElementById("countText");
+
 const finalScore = document.getElementById("finalScore");
 const maxComboText = document.getElementById("maxCombo");
 
@@ -184,15 +193,15 @@ let timer;
 let moleTimer;
 let isPaused = false;
 
-// 画面操作
+/* ===== 画面操作 ===== */
 function startFromRule() {
     ruleScreen.classList.add("hidden");
-    startGame();
+    startCountdown();
 }
 
 function restartGame() {
     resultScreen.classList.add("hidden");
-    startGame();
+    startCountdown();
 }
 
 function backToRule() {
@@ -200,7 +209,28 @@ function backToRule() {
     ruleScreen.classList.remove("hidden");
 }
 
-// モグラ生成
+/* ===== カウントダウン ===== */
+function startCountdown() {
+    let count = 3;
+    countdown.classList.remove("hidden");
+    countText.textContent = count;
+
+    const interval = setInterval(() => {
+        count--;
+
+        if (count > 0) {
+            countText.textContent = count;
+        } else if (count === 0) {
+            countText.textContent = "GO!";
+        } else {
+            clearInterval(interval);
+            countdown.classList.add("hidden");
+            startGame();
+        }
+    }, 1000);
+}
+
+/* ===== モグラ生成 ===== */
 for (let i = 0; i < 9; i++) {
     const hole = document.createElement("div");
     hole.classList.add("hole");
@@ -262,6 +292,7 @@ for (let i = 0; i < 9; i++) {
     game.appendChild(hole);
 }
 
+/* ===== モグラ出現 ===== */
 function showMole() {
     const moles = document.querySelectorAll(".mole");
     moles.forEach(m => m.classList.remove("show"));
@@ -279,6 +310,7 @@ function showMole() {
     mole.classList.add("show");
 }
 
+/* ===== ゲーム開始 ===== */
 function startGame() {
     score = 0;
     time = 20;
@@ -316,6 +348,7 @@ function startGame() {
     }, 1000);
 }
 
+/* ===== 一時停止 ===== */
 function togglePause() {
     isPaused = !isPaused;
     pauseBtn.textContent = isPaused ? "再開" : "一時停止";
